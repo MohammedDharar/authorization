@@ -1,32 +1,22 @@
 version: 0.2
-
 phases:
   install:
-    runtime-versions:
-      java: corretto8
-      docker: 18
+     runtime-versions:
+      java: corretto11
   pre_build:
     commands:
-      - echo "Pre_build"
-      - echo "Logging in to Amazon ECR"
-      - $(aws ecr get-login  --no-include-email --region us-east-2)
+      - echo Nothing to do in the pre_build phase...
   build:
     commands:
-      - echo "Build"
-      - echo "Entered build phase"
-      - echo "Building Java"
-      - cd  auth-service
-      - mvn -DskipTests clean package
-      - docker build -t auth-service-registry:latest .
-      - docker tag auth-service-registry:latest 408832051344.dkr.ecr.us-east-2.amazonaws.com/auth-service-registry:auth
-
+      - echo Build started on `date`
+      - mvn install
+      - mvn compile
+      - mvn package
   post_build:
     commands:
-      - echo "Post_build"
-      - docker push 408832051344.dkr.ecr.ap-south-1.amazonaws.com/auth-service-registry:auth
-      - printf '[{"name":"auth-container","imageUri":"%s"}]' 408832051344.dkr.ecr.us-east-2.amazonaws.com/auth-service-registry > taskdefinition.json
-      - cat taskdefinition.json
-
+      - echo Build completed on `date`
+      - mv target/*.jar authorization-app.jar
+      - dir
 artifacts:
   files:
-    - auth-service/taskdefinition.json
+    - authorization-app.jar
